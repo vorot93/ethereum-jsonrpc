@@ -1,0 +1,24 @@
+[package]
+name = "ethereum-jsonrpc"
+version = "0.1.0"
+edition = "2021"
+description = "Definitions for various Ethereum JSONRPC APIs"
+license = "GPL-3.0-only WITH Classpath-exception-2.0"
+
+[dependencies]
+ethereum-types = "0.13"
+ethnum = { version = "1", default-features = false, features = ["serde"] }
+jsonrpsee = { version = "0.15", features = ["macros"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+bytes = "1"
+hex = "0.4"
+
+[dev-dependencies]
+ethereum-jsonrpc = { path = ".", features = ["client"] }
+hex-literal = "0.3"
+tokio = { version = "1", features = ["full"] }
+
+[features]
+client = ["jsonrpsee/client", "jsonrpsee/async-client"]
+server = ["jsonrpsee/server"]
