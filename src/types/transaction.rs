@@ -12,53 +12,79 @@ pub struct AccessListEntry {
 pub enum MessageCall {
     #[serde(rename_all = "camelCase")]
     Legacy {
+        #[serde(default, skip_serializing_if = "Option::is_none")]
         from: Option<Address>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
         to: Option<Address>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
         gas: Option<U64>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
         gas_price: Option<U256>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
         value: Option<U256>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
         data: Option<Bytes>,
     },
     #[serde(rename_all = "camelCase")]
     EIP2930 {
+        #[serde(default, skip_serializing_if = "Option::is_none")]
         from: Option<Address>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
         to: Option<Address>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
         gas: Option<U64>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
         gas_price: Option<U256>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
         value: Option<U256>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
         data: Option<Bytes>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
         access_list: Option<Vec<AccessListEntry>>,
     },
     #[serde(rename_all = "camelCase")]
     EIP1559 {
+        #[serde(default, skip_serializing_if = "Option::is_none")]
         from: Option<Address>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
         to: Option<Address>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
         gas: Option<U64>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
         max_fee_per_gas: Option<U256>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
         max_priority_fee_per_gas: Option<U256>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
         value: Option<U256>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
         data: Option<Bytes>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
         access_list: Option<Vec<AccessListEntry>>,
     },
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(untagged, deny_unknown_fields)]
+#[serde(tag = "type", deny_unknown_fields)]
 pub enum TransactionMessage {
+    #[serde(rename = "0x0")]
     #[serde(rename_all = "camelCase")]
     Legacy {
+        #[serde(default, skip_serializing_if = "Option::is_none")]
         chain_id: Option<U64>,
         nonce: U64,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
         to: Option<Address>,
         gas: U64,
         gas_price: U256,
         value: U256,
         input: Bytes,
     },
+    #[serde(rename = "0x1")]
     #[serde(rename_all = "camelCase")]
     EIP2930 {
         chain_id: U64,
         nonce: U64,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
         to: Option<Address>,
         gas: U64,
         gas_price: U256,
@@ -66,10 +92,12 @@ pub enum TransactionMessage {
         input: Bytes,
         access_list: Vec<AccessListEntry>,
     },
+    #[serde(rename = "0x2")]
     #[serde(rename_all = "camelCase")]
     EIP1559 {
         chain_id: U64,
         nonce: U64,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
         to: Option<Address>,
         gas: U64,
         max_fee_per_gas: U256,
@@ -109,6 +137,7 @@ pub enum Tx {
 mod tests {
     use super::*;
     use hex_literal::hex;
+    use serde_json::json;
 
     #[test]
     fn test_ser_de_hexbytes_option() {
@@ -120,10 +149,12 @@ mod tests {
             value: None,
             data: None,
         };
-        let hexstring = r#"{"from":null,"to":"0x0000000000000000000000000000000000000000","gas":null,"gasPrice":null,"value":null,"data":null}"#;
-        assert_eq!(serde_json::to_string(&call_data).unwrap(), hexstring);
+        let hexstring = json!({
+            "to":"0x0000000000000000000000000000000000000000",
+        });
+        assert_eq!(serde_json::to_value(&call_data).unwrap(), hexstring);
         assert_eq!(
-            serde_json::from_str::<MessageCall>(hexstring).unwrap(),
+            serde_json::from_value::<MessageCall>(hexstring).unwrap(),
             call_data
         );
 
@@ -136,13 +167,16 @@ mod tests {
             data: Some(Bytes::from(&b"Hello Akula"[..])),
         };
 
-        let hexstring_with_data = r#"{"from":null,"to":"0x0000000000000000000000000000000000000000","gas":null,"gasPrice":null,"value":null,"data":"0x48656c6c6f20416b756c61"}"#;
+        let hexstring_with_data = json!({
+            "to":"0x0000000000000000000000000000000000000000",
+            "data":"0x48656c6c6f20416b756c61",
+        });
         assert_eq!(
-            serde_json::to_string(&call_data_with_data).unwrap(),
+            serde_json::to_value(&call_data_with_data).unwrap(),
             hexstring_with_data
         );
         assert_eq!(
-            serde_json::from_str::<MessageCall>(hexstring_with_data).unwrap(),
+            serde_json::from_value::<MessageCall>(hexstring_with_data).unwrap(),
             call_data_with_data
         );
     }
@@ -166,9 +200,27 @@ mod tests {
             hash: H256::repeat_byte(0xBB),
             transaction_index: Some(0x42.into()),
         };
-        let serialized = r#"{"chainId":"0x2","nonce":"0xc","to":"0x727fc6a68321b754475c668a6abfb6e9e71c169a","gas":"0x5208","gasPrice":"0x4a817c800","value":"0x8ac7230489e80000","input":"0xa9059cbb000000000213ed0f886efd100b67c7e4ec0a85a7d20dc971600000000000000000000015af1d78b58c4000","v":"0x28","r":"0xbe67e0a07db67da8d446f76add590e54b6e92cb6b8f9835aeb67540579a27717","s":"0x2d690516512020171c1ec870f6ff45398cc8609250326be89915fb538e7bd718","from":"0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","hash":"0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","transactionIndex":"0x42"}"#;
+        let serialized = json!({
+            "type": "0x0",
+            "chainId": "0x2",
+            "nonce": "0xc",
+            "to": "0x727fc6a68321b754475c668a6abfb6e9e71c169a",
+            "gas": "0x5208",
+            "gasPrice":"0x4a817c800",
+            "value":"0x8ac7230489e80000",
+            "input":"0xa9059cbb000000000213ed0f886efd100b67c7e4ec0a85a7d20dc971600000000000000000000015af1d78b58c4000",
+            "v":"0x28",
+            "r":"0xbe67e0a07db67da8d446f76add590e54b6e92cb6b8f9835aeb67540579a27717",
+            "s":"0x2d690516512020171c1ec870f6ff45398cc8609250326be89915fb538e7bd718",
+            "from":"0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "hash":"0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "transactionIndex":"0x42",
+        });
 
-        assert_eq!(serde_json::to_string(&tx).unwrap(), serialized);
-        assert_eq!(serde_json::from_str::<Transaction>(serialized).unwrap(), tx);
+        assert_eq!(serde_json::to_value(&tx).unwrap(), serialized);
+        assert_eq!(
+            serde_json::from_value::<Transaction>(serialized).unwrap(),
+            tx
+        );
     }
 }
