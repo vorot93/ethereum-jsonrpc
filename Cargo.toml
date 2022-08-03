@@ -6,11 +6,13 @@ description = "Definitions for various Ethereum JSONRPC APIs"
 license = "GPL-3.0-only WITH Classpath-exception-2.0"
 
 [dependencies]
+arrayvec = { version = "0.7", features = ["serde"] }
 ethereum-types = "0.13"
 ethnum = { version = "1", default-features = false, features = ["serde"] }
 jsonrpsee = { version = "0.15", features = ["macros"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+serde_with = "2"
 bytes = "1"
 hex = "0.4"
 

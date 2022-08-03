@@ -2,24 +2,36 @@
 use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(untagged, rename_all = "camelCase")]
+#[serde(untagged)]
 pub enum BlockFilter {
-    Exact {
-        block_hash: H256,
-    },
+    #[serde(rename_all = "camelCase")]
+    Exact { block_hash: H256 },
+    #[serde(rename_all = "camelCase")]
     Bounded {
         from_block: Option<BlockNumber>,
         to_block: Option<BlockNumber>,
     },
 }
 
+#[serde_as]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct LogAddressFilter(
+    #[serde_as(deserialize_as = "OneOrMany<_, PreferOne>")] pub Vec<Address>,
+);
+
+#[serde_as]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct LogTopicFilter(#[serde_as(deserialize_as = "OneOrMany<_, PreferOne>")] pub Vec<H256>);
+
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct LogFilter {
     #[serde(flatten)]
-    pub block_filter: BlockFilter,
-    pub address: Option<Vec<Address>>,
-    pub topics: Option<Vec<H256>>,
+    pub block_filter: Option<BlockFilter>,
+    pub address: Option<LogAddressFilter>,
+    pub topics: Option<ArrayVec<Option<LogTopicFilter>, 4>>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -190,7 +202,57 @@ pub trait EthApi {
     #[method(name = "getUncleCountByBlockNumber")]
     async fn get_uncle_count_by_block_number(&self, block_number: BlockNumber) -> RpcResult<U64>;
     #[method(name = "getLogs")]
-    async fn get_logs(&self, filter: LogFilter) -> RpcResult<TransactionLog>;
+    async fn get_logs(&self, filter: LogFilter) -> RpcResult<Vec<TransactionLog>>;
     #[method(name = "syncing")]
     async fn syncing(&self) -> RpcResult<SyncStatus>;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use hex_literal::hex;
+    use serde_json::json;
+
+    #[test]
+    fn log_filter_serialize() {
+        let encoded = json!({
+            "blockHash": "0xd4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3",
+            "address": "0xdeadbeef00000000000000000000000000000000",
+            "topics": [
+                null,
+                "0xaa00000000000000000000000000000000000000000000000000000000000000",
+                [
+                    "0xbb00000000000000000000000000000000000000000000000000000000000000",
+                    "0xcc00000000000000000000000000000000000000000000000000000000000000",
+                ],
+            ],
+        });
+        let v = LogFilter {
+            block_filter: Some(BlockFilter::Exact {
+                block_hash: hex!(
+                    "d4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3"
+                )
+                .into(),
+            }),
+            address: Some(LogAddressFilter(vec![hex!(
+                "deadbeef00000000000000000000000000000000"
+            )
+            .into()])),
+            topics: Some({
+                let mut arr = ArrayVec::new();
+                arr.push(None);
+                arr.push(Some(LogTopicFilter(vec![hex!(
+                    "aa00000000000000000000000000000000000000000000000000000000000000"
+                )
+                .into()])));
+                arr.push(Some(LogTopicFilter(vec![
+                    hex!("bb00000000000000000000000000000000000000000000000000000000000000").into(),
+                    hex!("cc00000000000000000000000000000000000000000000000000000000000000").into(),
+                ])));
+                arr
+            }),
+        };
+
+        assert_eq!(serde_json::from_value::<LogFilter>(encoded).unwrap(), v);
+    }
 }

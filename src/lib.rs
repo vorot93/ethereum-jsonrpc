@@ -21,6 +21,7 @@ pub use web3::*;
 
 mod prelude {
     pub use crate::types::*;
+    pub use arrayvec::ArrayVec;
     pub use ethereum_types::{Address, Bloom, H256, H64, U64};
     pub use ethnum::prelude::*;
     pub use std::collections::HashSet;
@@ -30,4 +31,5 @@ mod prelude {
     pub use jsonrpsee::proc_macros::rpc;
     pub use serde::de::{self, value::MapAccessDeserializer, Visitor};
     pub use serde::{Deserialize, Deserializer, Serialize, Serializer};
+    pub use serde_with::{formats::PreferOne, serde_as, OneOrMany};
 }
