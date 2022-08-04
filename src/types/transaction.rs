@@ -121,6 +121,8 @@ pub struct Transaction {
     pub from: Address,
     pub hash: H256,
     pub transaction_index: Option<U64>,
+    pub block_number: Option<U64>,
+    pub block_hash: Option<H256>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -199,6 +201,8 @@ mod tests {
             from: Address::repeat_byte(0xAA),
             hash: H256::repeat_byte(0xBB),
             transaction_index: Some(0x42.into()),
+            block_hash: None,
+            block_number: None,
         };
         let serialized = json!({
             "type": "0x0",
@@ -215,6 +219,8 @@ mod tests {
             "from":"0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "hash":"0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
             "transactionIndex":"0x42",
+            "blockHash": null,
+            "blockNumber": null,
         });
 
         assert_eq!(serde_json::to_value(&tx).unwrap(), serialized);
