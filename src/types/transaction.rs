@@ -28,21 +28,21 @@ macro_rules! impl_display_and_from_str_for_type {
     };
 }
 
-#[derive(PartialEq, Debug, Copy, Clone, Default, DeserializeFromStr, SerializeDisplay)]
+#[derive(PartialEq, Eq, Debug, Copy, Clone, Default, DeserializeFromStr, SerializeDisplay)]
 pub struct LegacyType;
 impl LegacyType {
     const TYPE: &'static str = "0x00";
 }
 impl_display_and_from_str_for_type!(LegacyType);
 
-#[derive(PartialEq, Debug, Copy, Clone, Default, DeserializeFromStr, SerializeDisplay)]
+#[derive(PartialEq, Eq, Debug, Copy, Clone, Default, DeserializeFromStr, SerializeDisplay)]
 pub struct EIP2930Type;
 impl EIP2930Type {
     const TYPE: &'static str = "0x01";
 }
 impl_display_and_from_str_for_type!(EIP2930Type);
 
-#[derive(PartialEq, Debug, Copy, Clone, Default, DeserializeFromStr, SerializeDisplay)]
+#[derive(PartialEq, Eq, Debug, Copy, Clone, Default, DeserializeFromStr, SerializeDisplay)]
 pub struct EIP1559Type;
 impl EIP1559Type {
     const TYPE: &'static str = "0x02";
@@ -57,7 +57,7 @@ pub struct AccessListEntry {
 }
 
 #[serde_as]
-#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
 #[serde(untagged, deny_unknown_fields)]
 pub enum MessageCall {
     #[serde(rename_all = "camelCase")]
