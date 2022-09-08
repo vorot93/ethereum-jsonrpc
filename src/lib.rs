@@ -1,3 +1,6 @@
+#![feature(
+    derive_default_enum
+)]
 #![doc = include_str!("../README.md")]
 
 mod debug;
