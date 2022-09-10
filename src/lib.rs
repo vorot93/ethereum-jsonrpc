@@ -6,6 +6,7 @@ mod erigon;
 mod eth;
 mod net;
 mod otterscan;
+mod parity;
 mod trace;
 pub mod types;
 mod web3;
@@ -16,6 +17,7 @@ pub use erigon::*;
 pub use eth::*;
 pub use net::*;
 pub use otterscan::*;
+pub use parity::*;
 pub use trace::*;
 pub use web3::*;
 
@@ -24,12 +26,17 @@ mod prelude {
     pub use arrayvec::ArrayVec;
     pub use ethereum_types::{Address, Bloom, H256, H64, U64};
     pub use ethnum::prelude::*;
-    pub use std::collections::HashSet;
+    pub use std::{
+        collections::{BTreeSet, HashSet},
+        num::NonZeroUsize,
+    };
 
     #[cfg(any(feature = "client", feature = "server"))]
     pub use jsonrpsee::core::RpcResult;
     pub use jsonrpsee::proc_macros::rpc;
-    pub use serde::de::{self, value::MapAccessDeserializer, Visitor};
-    pub use serde::{Deserialize, Deserializer, Serialize, Serializer};
+    pub use serde::{
+        de::{self, value::MapAccessDeserializer, Visitor},
+        Deserialize, Deserializer, Serialize, Serializer,
+    };
     pub use serde_with::{formats::PreferOne, serde_as, OneOrMany};
 }
