@@ -7,7 +7,7 @@ license = "GPL-3.0-only WITH Classpath-exception-2.0"
 
 [dependencies]
 arrayvec = { version = "0.7", features = ["serde"] }
-ethereum-types = "0.13"
+ethereum-types = "0.14"
 ethnum = { version = "1", default-features = false, features = ["serde"] }
 jsonrpsee = { version = "0.15", features = ["macros"] }
 serde = { version = "1", features = ["derive"] }
