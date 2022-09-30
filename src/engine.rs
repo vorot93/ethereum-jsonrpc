@@ -14,7 +14,7 @@ pub struct ExecutionPayload {
     pub gas_limit: U64,
     pub gas_used: U64,
     pub timestamp: U64,
-    pub extra_data: U256,
+    pub extra_data: Bytes,
     pub base_fee_per_gas: U256,
     pub block_hash: H256,
     pub transactions: Vec<Bytes>,
