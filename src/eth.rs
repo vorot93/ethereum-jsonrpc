@@ -132,6 +132,10 @@ pub trait EthApi {
         call_data: MessageCall,
         block_number: BlockNumber,
     ) -> RpcResult<U64>;
+    #[method(name = "gasPrice")]
+    async fn gas_price(&self) -> RpcResult<U256>;
+    #[method(name = "maxPriorityFeePerGas")]
+    async fn max_priority_fee_per_gas(&self) -> RpcResult<U256>;
     #[method(name = "getBalance")]
     async fn get_balance(&self, address: Address, block_number: BlockNumber) -> RpcResult<U256>;
     #[method(name = "getBlockByHash")]
